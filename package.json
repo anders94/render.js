@@ -1,0 +1,17 @@
+{
+  "name": "raytracing-renderer",
+  "version": "1.0.0",
+  "description": "A Node.js raytracing renderer with RenderMan RIB format support",
+  "main": "src/renderer.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/renderer.js",
+    "test": "node test/test.js"
+  },
+  "keywords": ["raytracing", "rendering", "renderman", "rib", "graphics"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,44 @@
+##RenderMan RIB-Structure 1.1
+version 3.03
+
+Format 400 300 1
+Projection "perspective" "fov" [45]
+
+WorldBegin
+
+# Set up lighting
+LightSource "distantlight" 1 "from" [5 5 5] "to" [0 0 0] "intensity" [1]
+
+# Red sphere
+AttributeBegin
+Color [0.8 0.2 0.2]
+Surface "plastic"
+Translate -1 0 -3
+Sphere 0.8 -0.8 0.8 360
+AttributeEnd
+
+# Green sphere  
+AttributeBegin
+Color [0.2 0.8 0.2]
+Surface "matte"
+Translate 1 0 -3
+Sphere 0.6 -0.6 0.6 360
+AttributeEnd
+
+# Blue metallic sphere
+AttributeBegin
+Color [0.3 0.3 0.9]
+Surface "metal"
+Translate 0 1.2 -2.5
+Sphere 0.5 -0.5 0.5 360
+AttributeEnd
+
+# Small yellow sphere
+AttributeBegin
+Color [0.9 0.9 0.2]
+Surface "plastic"
+Translate 0 -0.8 -2
+Sphere 0.3 -0.3 0.3 360
+AttributeEnd
+
+WorldEnd
