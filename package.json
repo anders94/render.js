@@ -1,6 +1,6 @@
 {
   "name": "raytracing-renderer",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "A Node.js raytracing renderer with RenderMan RIB format support",
   "main": "src/renderer.js",
   "type": "module",
