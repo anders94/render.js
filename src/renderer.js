@@ -3,8 +3,10 @@
 import { Vec3, Color } from './math.js';
 import { Sphere, Plane, Material, Scene, Light } from './geometry.js';
 import { Camera, Raytracer } from './raytracer.js';
+import { MultiThreadedRaytracer } from './multi-threaded-raytracer.js';
 import { RIBParser } from './rib-parser.js';
 import { ImageWriter } from './image-output.js';
+import { cpus } from 'os';
 import fs from 'fs';
 
 class RenderApp {
@@ -57,8 +59,8 @@ class RenderApp {
             }
             
             this.camera = new Camera(
-                new Vec3(0, 0, 3),
-                new Vec3(0, 0, 0),
+                new Vec3(0, 0, 1),
+                new Vec3(0, 0, -3),
                 new Vec3(0, 1, 0),
                 45,
                 16/9
@@ -66,6 +68,7 @@ class RenderApp {
             
             console.log(`Loaded RIB file: ${filePath}`);
             console.log(`Scene contains ${this.scene.objects.length} objects and ${this.scene.lights.length} lights`);
+            
             return true;
         } catch (error) {
             console.error(`Error parsing RIB file: ${error.message}`);
@@ -73,13 +76,24 @@ class RenderApp {
         }
     }
 
-    render(width = 400, height = 300, samples = 1, outputPath = 'output.ppm', antialiasingQuality = null, gammaCorrection = 2.2, useStratified = true) {
+    async render(width = 400, height = 300, samples = 1, outputPath = 'output.ppm', antialiasingQuality = null, gammaCorrection = 2.2, useStratified = true, useMultiThreading = true, numThreads = null, randomSeed = null) {
         if (!this.scene || !this.camera) {
             console.error('Scene or camera not initialized');
             return;
         }
 
-        this.raytracer = new Raytracer(this.scene, this.camera, width, height);
+        const availableCpus = cpus().length;
+        const actualThreads = numThreads || availableCpus;
+        
+        // Choose raytracer based on threading preference
+        if (useMultiThreading && actualThreads > 1) {
+            this.raytracer = new MultiThreadedRaytracer(this.scene, this.camera, width, height);
+            this.raytracer.setNumThreads(actualThreads);
+            console.log(`Using multi-threaded rendering with ${actualThreads} threads (${availableCpus} CPUs available)`);
+        } else {
+            this.raytracer = new Raytracer(this.scene, this.camera, width, height);
+            console.log(`Using single-threaded rendering`);
+        }
         
         if (antialiasingQuality) {
             this.raytracer.setAntialiasingQuality(antialiasingQuality);
@@ -93,12 +107,18 @@ class RenderApp {
         // Apply gamma correction setting
         this.raytracer.setGammaCorrection(gammaCorrection);
         
+        // Set random seed if provided
+        if (randomSeed !== null) {
+            this.raytracer.setRandomSeed(randomSeed);
+            console.log(`Using deterministic seed: ${randomSeed}`);
+        }
+        
         console.log(`Output file: ${outputPath}`);
         console.log(`Gamma correction: ${this.raytracer.gammaCorrection}`);
         console.log(`Stratified sampling: ${this.raytracer.useStratifiedSampling ? 'enabled' : 'disabled'}`);
         
         const startTime = Date.now();
-        const image = this.raytracer.render();
+        const image = await this.raytracer.render();
         const endTime = Date.now();
         
         console.log(`Render completed in ${(endTime - startTime) / 1000} seconds`);
@@ -118,6 +138,9 @@ Options:
   --aa <quality>       Antialiasing quality: none, low, medium, high, ultra
   --gamma <number>     Gamma correction value (default: 2.2)
   --no-stratified      Disable stratified sampling (use random sampling)
+  --single-threaded    Disable multi-threading (use single thread)
+  --threads <number>   Number of threads to use (default: auto-detect)
+  --seed <number>      Random seed for deterministic output (default: auto)
   --output <file>      Output filename (default: output.ppm)
   --help              Show this help message
 
@@ -133,10 +156,12 @@ Examples:
   node renderer.js --width 800 --height 600 --aa high
   node renderer.js --rib scene.rib --aa medium --output rendered.ppm
   node renderer.js --samples 16 --no-stratified
+  node renderer.js --single-threaded --width 400 --height 300
+  node renderer.js --threads 4 --aa high
         `);
     }
 
-    run() {
+    async run() {
         const args = process.argv.slice(2);
         
         if (args.includes('--help')) {
@@ -152,6 +177,9 @@ Examples:
         let antialiasingQuality = null;
         let gammaCorrection = 2.2;
         let useStratified = true;
+        let useMultiThreading = true;
+        let numThreads = null;
+        let randomSeed = null;
 
         for (let i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -176,6 +204,15 @@ Examples:
                 case '--no-stratified':
                     useStratified = false;
                     break;
+                case '--single-threaded':
+                    useMultiThreading = false;
+                    break;
+                case '--threads':
+                    numThreads = parseInt(args[++i]);
+                    break;
+                case '--seed':
+                    randomSeed = parseInt(args[++i]);
+                    break;
                 case '--output':
                     outputPath = args[++i];
                     break;
@@ -192,11 +229,14 @@ Examples:
             this.createDefaultScene();
         }
 
-        this.render(width, height, samples, outputPath, antialiasingQuality, gammaCorrection, useStratified);
+        await this.render(width, height, samples, outputPath, antialiasingQuality, gammaCorrection, useStratified, useMultiThreading, numThreads, randomSeed);
     }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     const app = new RenderApp();
-    app.run();
+    app.run().catch(error => {
+        console.error('Rendering failed:', error.message);
+        process.exit(1);
+    });
 }

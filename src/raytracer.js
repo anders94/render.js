@@ -1,11 +1,13 @@
 import { Vec3, Ray, Color } from './math.js';
+import { random, setSeed, createPixelRandom } from './random.js';
 
 export class Camera {
     constructor(position, target, up, fov = 45, aspectRatio = 16/9) {
         this.position = position;
         this.target = target;
         this.up = up.normalize();
-        this.fov = fov * Math.PI / 180;
+        this.fovDegrees = fov; // Store original degrees value
+        this.fov = fov * Math.PI / 180; // Convert to radians for calculations
         this.aspectRatio = aspectRatio;
         
         this.setupCamera();
@@ -48,9 +50,17 @@ export class Raytracer {
         this.samples = 1;
         this.useStratifiedSampling = true;
         this.gammaCorrection = 2.2;
+        this.randomSeed = 12345; // Default deterministic seed
     }
     
-    render() {
+    setRandomSeed(seed) {
+        this.randomSeed = seed;
+    }
+    
+    async render() {
+        // Initialize deterministic seed for this render
+        setSeed(this.randomSeed);
+        
         const image = [];
         
         for (let j = this.height - 1; j >= 0; j--) {
@@ -81,6 +91,9 @@ export class Raytracer {
     }
     
     renderPixel(x, y) {
+        // Set pixel-specific seed for deterministic randomness
+        const pixelRandom = createPixelRandom(this.randomSeed, x, y, this.width, this.height);
+        
         if (this.samples === 1) {
             // Single sample - no antialiasing
             const u = (x + 0.5) / this.width;
@@ -99,8 +112,8 @@ export class Raytracer {
             for (let sy = 0; sy < sqrtSamples; sy++) {
                 for (let sx = 0; sx < sqrtSamples; sx++) {
                     // Jittered stratified sampling
-                    const offsetX = (sx + Math.random()) / sqrtSamples;
-                    const offsetY = (sy + Math.random()) / sqrtSamples;
+                    const offsetX = (sx + pixelRandom.random()) / sqrtSamples;
+                    const offsetY = (sy + pixelRandom.random()) / sqrtSamples;
                     
                     const u = (x + offsetX) / this.width;
                     const v = (y + offsetY) / this.height;
@@ -115,8 +128,8 @@ export class Raytracer {
         } else {
             // Random sampling (original method)
             for (let s = 0; s < this.samples; s++) {
-                const u = (x + Math.random()) / this.width;
-                const v = (y + Math.random()) / this.height;
+                const u = (x + pixelRandom.random()) / this.width;
+                const v = (y + pixelRandom.random()) / this.height;
                 
                 const ray = this.camera.getRay(u, v);
                 const color = this.traceRay(ray, this.maxDepth);

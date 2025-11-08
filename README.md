@@ -1,15 +1,18 @@
-# Raytracing Renderer
+# Render.js: A Raytracing Renderer
 
 A Node.js raytracing renderer with RenderMan RIB format support, implemented in pure JavaScript.
 
 ## Features
 
 - **Pure JavaScript Implementation**: No external dependencies, runs entirely in Node.js
+- **Multi-Threaded Rendering**: Automatic CPU detection and parallel processing using worker threads
 - **RenderMan RIB Support**: Parse and render RenderMan RIB format files
+- **Advanced Antialiasing**: Stratified sampling with quality presets
 - **Core Raytracing**: Full raytracing pipeline with reflection support
 - **Lighting Models**: Phong/Blinn-Phong shading with multiple light sources
 - **Geometry Primitives**: Spheres, planes, and triangles
 - **Material System**: Support for different surface materials (plastic, metal, matte)
+- **Gamma Correction**: Proper color space handling
 - **PPM Image Output**: Generates standard PPM image files
 
 ## Installation
@@ -17,15 +20,13 @@ A Node.js raytracing renderer with RenderMan RIB format support, implemented in 
 ```bash
 git clone https://github.com/anders94/render.js.git
 cd render.js
-npm install
 ```
+Note: there are no dependancies so `npm install` is not necessary.
 
 ## Usage
 
 ### Basic Usage (Default Scene)
 ```bash
-npm start
-# or
 node src/renderer.js
 ```
 
@@ -44,6 +45,9 @@ node src/renderer.js --width 800 --height 600 --aa high --output my_render.ppm
 
 # With custom gamma correction
 node src/renderer.js --aa medium --gamma 1.8 --output linear.ppm
+
+# Multi-threaded high quality rendering
+node src/renderer.js --width 800 --height 600 --aa high --threads 8
 ```
 
 ## Command Line Options
@@ -55,6 +59,8 @@ node src/renderer.js --aa medium --gamma 1.8 --output linear.ppm
 - `--aa <quality>`: Antialiasing quality preset: none, low, medium, high, ultra
 - `--gamma <number>`: Gamma correction value (default: 2.2)
 - `--no-stratified`: Disable stratified sampling (use random sampling)
+- `--single-threaded`: Disable multi-threading (use single thread)
+- `--threads <number>`: Number of threads to use (default: auto-detect)
 - `--output <file>`: Output filename (default: output.ppm)
 - `--help`: Show help message
 
@@ -124,7 +130,10 @@ WorldEnd
 ## Performance Notes
 
 - Rendering time increases significantly with resolution and sample count
-- The renderer is single-threaded; consider using lower resolutions for testing
+- **Multi-Threading:**
+  - Multi-threaded rendering is enabled by default and automatically uses *all available CPU cores*
+  - Performance improvement scales with CPU core count (typically 2-8x faster)
+  - Use `--threads N` and `--seed` to seed the random number generation for debugging or comparison
 - **Antialiasing Options:**
   - `--aa none`: Fastest, aliased edges
   - `--aa low`: 4x slower than none, removes most aliasing
@@ -134,6 +143,12 @@ WorldEnd
 - **Stratified vs Random Sampling:**
   - Stratified sampling (default) provides better quality and more even noise distribution
   - Random sampling (`--no-stratified`) may be faster but with more noise
+
+### Performance Tips
+- Use multi-threading for production renders (enabled by default)
+- Start with `--aa medium` for quality/speed balance
+- Use lower resolutions for testing and development
+- Consider `--threads N` where N is slightly less than your CPU cores for better system responsiveness
 
 ## Viewing Output
 
