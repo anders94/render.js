@@ -23,6 +23,19 @@ cd render.js
 ```
 Note: there are no dependancies so `npm install` is not necessary.
 
+## Quick Start
+
+```bash
+# Run the raytracer with example scene
+npm start
+
+# Run tests to verify everything works
+npm test
+
+# Render a high-quality example
+npm run render:example
+```
+
 ## Usage
 
 ### Basic Usage (Default Scene)
@@ -94,6 +107,32 @@ The renderer supports a subset of RenderMan RIB commands:
 - `metal`: Highly reflective metallic material
 - `matte`: Non-reflective diffuse material
 
+## Testing
+
+The raytracer includes a comprehensive testing framework that validates output using deterministic seeding:
+
+```bash
+# Run all tests
+npm test
+
+# Generate reference images for tests
+npm run test:references
+
+# Clean test output files
+npm run test:clean
+
+# Compare two images manually
+npm run image:diff image1.ppm image2.ppm
+```
+
+### Test Features
+
+- **Bit-for-bit comparison** of rendered images with reference images
+- **Multi-threading validation** ensures single and multi-threaded renders are identical
+- **Deterministic seeding** for reproducible test results
+- **Automatic reference generation** when references don't exist
+- **Comprehensive reporting** with detailed failure analysis
+
 ## Architecture
 
 The renderer is built with a modular architecture:
@@ -102,6 +141,8 @@ The renderer is built with a modular architecture:
 - **geometry.js**: Geometric primitives and scene management
 - **rib-parser.js**: RenderMan RIB file parser
 - **raytracer.js**: Core raytracing engine and camera system
+- **multi-threaded-raytracer.js**: Multi-threading implementation with worker threads
+- **random.js**: Deterministic random number generator for reproducible results
 - **image-output.js**: Image file generation (PPM format)
 - **renderer.js**: Main application and command-line interface
 

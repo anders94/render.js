@@ -1,10 +1,36 @@
+# Environment files
 .env
+
+# Dependencies
+node_modules/
+
+# Test output files
+tests/temp/
+tests/output/
+
+# Generated images and text files
+*.ppm
+*.png
+*.jpg
+*.jpeg
+*.txt
+
+# OS and editor files
 *~
 .*~
-node_modules/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files
 logs/
 log/
+*.log
+
+# Runtime files
 supervise/
 run
-*.txt
-*.ppm
+*.pid

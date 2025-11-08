@@ -1,0 +1,37 @@
+{
+  "testCases": [
+    {
+      "name": "basic-spheres",
+      "description": "Basic sphere rendering test",
+      "rib": "examples/spheres.rib",
+      "seed": 42,
+      "width": 400,
+      "height": 300,
+      "samples": 1,
+      "threads": [1, 2, 4]
+    },
+    {
+      "name": "antialiasing-low",
+      "description": "Low antialiasing quality test",
+      "rib": "examples/spheres.rib",
+      "seed": 123,
+      "width": 200,
+      "height": 150,
+      "antialiasing": "low",
+      "threads": [1, 2]
+    },
+    {
+      "name": "single-thread-baseline",
+      "description": "Single thread baseline for performance comparison",
+      "rib": "examples/spheres.rib",
+      "seed": 999,
+      "width": 800,
+      "height": 600,
+      "antialiasing": "medium",
+      "threads": [1]
+    }
+  ],
+  "referenceDir": "tests/references",
+  "outputDir": "tests/output",
+  "tempDir": "tests/temp"
+}

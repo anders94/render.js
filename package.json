@@ -6,7 +6,12 @@
   "type": "module",
   "scripts": {
     "start": "node src/renderer.js",
-    "test": "node test/test.js"
+    "test": "node tests/test-runner.js",
+    "test:quick": "echo 'Quick test not implemented yet - running full test suite' && node tests/test-runner.js",
+    "test:references": "node tests/test-runner.js --generate-references",
+    "test:clean": "rm -rf tests/temp/* tests/output/* 2>/dev/null || true",
+    "render:example": "node src/renderer.js --rib examples/spheres.rib --width 800 --height 600 --aa medium --output example-render.ppm",
+    "image:diff": "node tests/image-diff.js"
   },
   "keywords": ["raytracing", "rendering", "renderman", "rib", "graphics"],
   "author": "",
