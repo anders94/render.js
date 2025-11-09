@@ -38,6 +38,11 @@ export class Camera {
             
         return new Ray(this.position, direction);
     }
+    
+    setAspectRatio(aspectRatio) {
+        this.aspectRatio = aspectRatio;
+        this.setupCamera();
+    }
 }
 
 export class Raytracer {
@@ -95,7 +100,7 @@ export class Raytracer {
         const pixelRandom = createPixelRandom(this.randomSeed, x, y, this.width, this.height);
         
         if (this.samples === 1) {
-            // Single sample - no antialiasing
+            // Single sample - no antialiasing, sample at pixel center
             const u = (x + 0.5) / this.width;
             const v = (y + 0.5) / this.height;
             const ray = this.camera.getRay(u, v);
@@ -111,9 +116,13 @@ export class Raytracer {
             
             for (let sy = 0; sy < sqrtSamples; sy++) {
                 for (let sx = 0; sx < sqrtSamples; sx++) {
-                    // Jittered stratified sampling
-                    const offsetX = (sx + pixelRandom.random()) / sqrtSamples;
-                    const offsetY = (sy + pixelRandom.random()) / sqrtSamples;
+                    // Jittered stratified sampling within pixel bounds
+                    // Map sub-pixel grid to [0,1] range within the pixel
+                    const jitterX = pixelRandom.random();
+                    const jitterY = pixelRandom.random();
+                    
+                    const offsetX = (sx + jitterX) / sqrtSamples;
+                    const offsetY = (sy + jitterY) / sqrtSamples;
                     
                     const u = (x + offsetX) / this.width;
                     const v = (y + offsetY) / this.height;

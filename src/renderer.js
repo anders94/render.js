@@ -82,6 +82,9 @@ class RenderApp {
             return;
         }
 
+        // Update camera aspect ratio to match image dimensions
+        this.camera.setAspectRatio(width / height);
+
         const availableCpus = cpus().length;
         const actualThreads = numThreads || availableCpus;
         

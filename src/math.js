@@ -128,9 +128,10 @@ export class Ray {
 
 export class Color {
     constructor(r = 0, g = 0, b = 0) {
-        this.r = Math.max(0, Math.min(1, r));
-        this.g = Math.max(0, Math.min(1, g));
-        this.b = Math.max(0, Math.min(1, b));
+        // Don't clamp colors during construction - allow HDR values during rendering
+        this.r = Math.max(0, r); // Only clamp to prevent negative values
+        this.g = Math.max(0, g);
+        this.b = Math.max(0, b);
     }
 
     add(color) {
