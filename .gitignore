@@ -10,9 +10,6 @@ tests/output/
 
 # Generated images and text files
 *.ppm
-*.png
-*.jpg
-*.jpeg
 *.txt
 
 # OS and editor files

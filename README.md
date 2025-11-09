@@ -2,6 +2,12 @@
 
 A Node.js raytracing renderer with RenderMan RIB format support, implemented in pure JavaScript.
 
+## Sample Output
+
+<img src="images/simple.png" alt="Sample raytraced output showing spheres with reflections and realistic lighting" width="400">
+
+*Example render showing multi-colored spheres with reflections, realistic lighting, and antialiasing*
+
 ## Features
 
 - **Pure JavaScript Implementation**: No external dependencies, runs entirely in Node.js
