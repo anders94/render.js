@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { Vec3, Color, Matrix4 } from './math.js';
-import { Sphere, Plane, Triangle, Material, Scene, Light } from './geometry.js';
+import { Sphere, Plane, Triangle, Material, Scene, Light, NURBSSurface } from './geometry.js';
 
 export class RIBParser {
     constructor() {
@@ -15,11 +15,43 @@ export class RIBParser {
         const content = fs.readFileSync(filePath, 'utf8');
         const lines = content.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
         
-        for (const line of lines) {
+        // Handle multi-line statements (like NURBS with bracket arrays)
+        const processedLines = this.combineMultilineStatements(lines);
+        
+        for (const line of processedLines) {
             this.parseLine(line);
         }
         
         return this.scene;
+    }
+    
+    combineMultilineStatements(lines) {
+        const result = [];
+        let currentStatement = '';
+        let bracketDepth = 0;
+        
+        for (const line of lines) {
+            currentStatement += (currentStatement ? ' ' : '') + line;
+            
+            // Count brackets to determine if statement is complete
+            for (const char of line) {
+                if (char === '[') bracketDepth++;
+                if (char === ']') bracketDepth--;
+            }
+            
+            // If brackets are balanced, statement is complete
+            if (bracketDepth === 0) {
+                result.push(currentStatement);
+                currentStatement = '';
+            }
+        }
+        
+        // Add any remaining statement
+        if (currentStatement.trim()) {
+            result.push(currentStatement);
+        }
+        
+        return result;
     }
 
     parseLine(line) {
@@ -96,6 +128,10 @@ export class RIBParser {
                 
             case 'ConcatTransform':
                 this.concatTransform(args);
+                break;
+                
+            case 'NuPatch':
+                this.parseNuPatch(args);
                 break;
                 
             default:
@@ -294,13 +330,33 @@ export class RIBParser {
     parseVertexList(args) {
         const vertices = [];
         
-        for (let i = 0; i < args.length; i += 3) {
-            if (i + 2 < args.length) {
-                vertices.push(new Vec3(
-                    parseFloat(args[i]),
-                    parseFloat(args[i + 1]),
-                    parseFloat(args[i + 2])
-                ));
+        // Find the "P" parameter and extract the coordinates
+        let coordsStart = -1;
+        for (let i = 0; i < args.length; i++) {
+            if (args[i] === '"P"' || args[i] === 'P') {
+                coordsStart = i + 1;
+                break;
+            }
+        }
+        
+        if (coordsStart === -1) {
+            return vertices;
+        }
+        
+        // Parse coordinates from the array after "P"
+        const coordsStr = args[coordsStart];
+        
+        if (coordsStr.startsWith('[') && coordsStr.endsWith(']')) {
+            const coordsArray = this.parseFloatArray(coordsStr);
+            
+            for (let i = 0; i < coordsArray.length; i += 3) {
+                if (i + 2 < coordsArray.length) {
+                    vertices.push(new Vec3(
+                        coordsArray[i],
+                        coordsArray[i + 1],
+                        coordsArray[i + 2]
+                    ));
+                }
             }
         }
         
@@ -310,5 +366,115 @@ export class RIBParser {
     parseMatrix(matrixString) {
         const cleaned = matrixString.replace(/[\[\]]/g, '');
         return cleaned.split(/\s+/).map(parseFloat);
+    }
+    
+    parseNuPatch(args) {
+        try {
+            // Parse NuPatch parameters
+            // Format: NuPatch nu uorder uknot umin umax nv vorder vknot vmin vmax "P" [control_points]
+            
+            const nu = parseInt(args[0]);              // Number of control points in u direction
+            const uOrder = parseInt(args[1]);         // Order in u direction (degree + 1)
+            const uKnotString = args[2];              // U knot vector
+            const uMin = parseFloat(args[3]);         // U parameter minimum
+            const uMax = parseFloat(args[4]);         // U parameter maximum
+            const nv = parseInt(args[5]);             // Number of control points in v direction
+            const vOrder = parseInt(args[6]);         // Order in v direction (degree + 1)
+            const vKnotString = args[7];              // V knot vector
+            const vMin = parseFloat(args[8]);         // V parameter minimum
+            const vMax = parseFloat(args[9]);         // V parameter maximum
+            
+            // Parse knot vectors
+            const uKnots = this.parseFloatArray(uKnotString);
+            const vKnots = this.parseFloatArray(vKnotString);
+            
+            // Degrees are order - 1
+            const uDegree = uOrder - 1;
+            const vDegree = vOrder - 1;
+            
+            // Find control points parameter - usually "P" followed by array
+            let controlPointsIndex = -1;
+            for (let i = 10; i < args.length; i++) {
+                if (args[i] === '"P"' || args[i] === 'P') {
+                    controlPointsIndex = i + 1;
+                    break;
+                }
+            }
+            
+            if (controlPointsIndex === -1 || controlPointsIndex >= args.length) {
+                console.warn('NURBS control points not found');
+                return;
+            }
+            
+            // Parse control points (expect nu * nv * 3 values for 3D points)
+            const controlPointsData = this.parseFloatArray(args[controlPointsIndex]);
+            const expectedPoints = nu * nv;
+            const expectedValues = expectedPoints * 3; // 3D points
+            
+            if (controlPointsData.length < expectedValues) {
+                console.warn(`NURBS control points insufficient: expected ${expectedValues}, got ${controlPointsData.length}`);
+                return;
+            }
+            
+            // Organize control points into 2D array
+            const controlPoints = [];
+            const weights = [];
+            
+            for (let i = 0; i < nu; i++) {
+                controlPoints[i] = [];
+                weights[i] = [];
+                
+                for (let j = 0; j < nv; j++) {
+                    const index = (i * nv + j) * 3;
+                    controlPoints[i][j] = new Vec3(
+                        controlPointsData[index],
+                        controlPointsData[index + 1],
+                        controlPointsData[index + 2]
+                    );
+                    
+                    // Apply current transformation to control points
+                    controlPoints[i][j] = this.getCurrentTransform().transformPoint(controlPoints[i][j]);
+                    
+                    // Default weight of 1.0 (can be extended to support rational surfaces)
+                    weights[i][j] = 1.0;
+                }
+            }
+            
+            // Create NURBS surface
+            const nurbsSurface = new NURBSSurface(
+                controlPoints,
+                weights,
+                uKnots,
+                vKnots,
+                uDegree,
+                vDegree,
+                new Material(
+                    this.currentColor,
+                    this.currentMaterial.ambient,
+                    this.currentMaterial.diffuse,
+                    this.currentMaterial.specular,
+                    this.currentMaterial.shininess,
+                    this.currentMaterial.reflectivity
+                )
+            );
+            
+            this.scene.add(nurbsSurface);
+            
+            console.log(`Added NURBS surface: ${nu}x${nv} control points, degrees (${uDegree},${vDegree})`);
+            
+        } catch (error) {
+            console.error('Error parsing NURBS surface:', error.message);
+        }
+    }
+    
+    parseFloatArray(arrayString) {
+        // Handle both bracketed arrays [1.0 2.0 3.0] and space-separated values
+        let cleaned = arrayString;
+        
+        // Remove quotes and brackets
+        cleaned = cleaned.replace(/["\[\]]/g, '');
+        
+        // Split by whitespace and convert to floats
+        return cleaned.split(/\s+/).filter(s => s.length > 0).map(parseFloat);
     }
 }

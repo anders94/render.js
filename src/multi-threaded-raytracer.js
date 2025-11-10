@@ -238,6 +238,26 @@ export class MultiThreadedRaytracer {
                         reflectivity: obj.material.reflectivity
                     }
                 };
+            } else if (obj.controlPoints) { // NURBS Surface
+                return {
+                    type: 'nurbs',
+                    controlPoints: obj.controlPoints.map(row => row.map(point => ({
+                        x: point.x, y: point.y, z: point.z
+                    }))),
+                    weights: obj.weights,
+                    uKnots: obj.uKnots,
+                    vKnots: obj.vKnots,
+                    uDegree: obj.uDegree,
+                    vDegree: obj.vDegree,
+                    material: {
+                        color: { r: obj.material.color.r, g: obj.material.color.g, b: obj.material.color.b },
+                        ambient: obj.material.ambient,
+                        diffuse: obj.material.diffuse,
+                        specular: obj.material.specular,
+                        shininess: obj.material.shininess,
+                        reflectivity: obj.material.reflectivity
+                    }
+                };
             }
         }).filter(obj => obj !== undefined);
         

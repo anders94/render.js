@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import { Vec3, Ray, Color } from './math.js';
-import { Sphere, Plane, Triangle, Material, Scene, Light } from './geometry.js';
+import { Sphere, Plane, Triangle, Material, Scene, Light, NURBSSurface } from './geometry.js';
 import { Camera, Raytracer } from './raytracer.js';
 import { createPixelRandom } from './random.js';
 
@@ -95,6 +95,30 @@ function reconstructScene(sceneData) {
                 objData.material.reflectivity
             );
             obj = new Triangle(v0, v1, v2, material);
+        } else if (objData.type === 'nurbs') {
+            // Reconstruct control points
+            const controlPoints = objData.controlPoints.map(row => 
+                row.map(point => new Vec3(point.x, point.y, point.z))
+            );
+            
+            const material = new Material(
+                new Color(objData.material.color.r, objData.material.color.g, objData.material.color.b),
+                objData.material.ambient,
+                objData.material.diffuse,
+                objData.material.specular,
+                objData.material.shininess,
+                objData.material.reflectivity
+            );
+            
+            obj = new NURBSSurface(
+                controlPoints,
+                objData.weights,
+                objData.uKnots,
+                objData.vKnots,
+                objData.uDegree,
+                objData.vDegree,
+                material
+            );
         }
         
         if (obj) {

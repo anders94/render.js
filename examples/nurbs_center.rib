@@ -1,0 +1,26 @@
+##RenderMan RIB-Structure 1.1
+version 3.03
+
+Format 400 400 1
+Projection "perspective" "fov" [45]
+
+WorldBegin
+
+# Simple front lighting
+LightSource "distantlight" 1 "from" [1 1 1] "to" [0 0 0] "intensity" [1.0]
+
+# NURBS surface positioned directly in center of screen at z=-2
+AttributeBegin
+Color [1.0 0.0 0.0]
+Surface "matte"
+
+# Simple 3x3 NURBS surface - positioned at z=-3 like a sphere would be
+NuPatch 3 3 "0 0 0 1 1 1" 0 1 3 3 "0 0 0 1 1 1" 0 1 "P" [
+    -1.0 -1.0 -3.0    0.0 -1.0 -3.0    1.0 -1.0 -3.0
+    -1.0  0.0 -3.0    0.0  0.0 -3.0    1.0  0.0 -3.0
+    -1.0  1.0 -3.0    0.0  1.0 -3.0    1.0  1.0 -3.0
+]
+
+AttributeEnd
+
+WorldEnd

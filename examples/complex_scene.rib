@@ -1,0 +1,249 @@
+##RenderMan RIB-Structure 1.1
+version 3.03
+
+Format 800 600 1
+Projection "perspective" "fov" [35]
+
+WorldBegin
+
+# Multiple light sources for complex lighting
+LightSource "distantlight" 1 "from" [5 8 3] "to" [0 0 0] "intensity" [0.8]
+LightSource "distantlight" 2 "from" [-3 4 5] "to" [0 0 0] "intensity" [0.4]
+LightSource "distantlight" 3 "from" [0 10 -2] "to" [0 0 0] "intensity" [0.3]
+
+# Central metallic sphere with transformations
+AttributeBegin
+TransformBegin
+    Translate 0 0.5 -4
+    Scale 1.2 1.2 1.2
+    Color [0.9 0.8 0.7]
+    Surface "metal"
+    Sphere 0.8 -0.8 0.8 360
+TransformEnd
+AttributeEnd
+
+# Ring of colored spheres using rotations and translations
+AttributeBegin
+TransformBegin
+    Translate 0 0 -4
+    
+    # Red sphere
+    TransformBegin
+        Rotate 0 0 1 0
+        Translate 2.5 0 0
+        Color [0.9 0.2 0.2]
+        Surface "plastic"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Orange sphere
+    TransformBegin
+        Rotate 45 0 1 0
+        Translate 2.5 0 0
+        Color [1.0 0.6 0.2]
+        Surface "plastic"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Yellow sphere
+    TransformBegin
+        Rotate 90 0 1 0
+        Translate 2.5 0 0
+        Color [0.9 0.9 0.3]
+        Surface "matte"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Green sphere
+    TransformBegin
+        Rotate 135 0 1 0
+        Translate 2.5 0 0
+        Color [0.3 0.8 0.3]
+        Surface "plastic"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Blue sphere
+    TransformBegin
+        Rotate 180 0 1 0
+        Translate 2.5 0 0
+        Color [0.3 0.4 0.9]
+        Surface "metal"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Purple sphere
+    TransformBegin
+        Rotate 225 0 1 0
+        Translate 2.5 0 0
+        Color [0.7 0.3 0.8]
+        Surface "plastic"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Magenta sphere
+    TransformBegin
+        Rotate 270 0 1 0
+        Translate 2.5 0 0
+        Color [0.9 0.3 0.6]
+        Surface "metal"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+    # Pink sphere
+    TransformBegin
+        Rotate 315 0 1 0
+        Translate 2.5 0 0
+        Color [1.0 0.7 0.8]
+        Surface "matte"
+        Sphere 0.4 -0.4 0.4 360
+    TransformEnd
+    
+TransformEnd
+AttributeEnd
+
+# Small orbiting spheres at different heights
+AttributeBegin
+TransformBegin
+    Translate 0 1.8 -4
+    
+    # Small metallic satellite
+    TransformBegin
+        Rotate 30 0 1 0
+        Translate 1.5 0 0
+        Scale 0.6 0.6 0.6
+        Color [0.8 0.8 0.9]
+        Surface "metal"
+        Sphere 0.3 -0.3 0.3 360
+    TransformEnd
+    
+    # Another small satellite
+    TransformBegin
+        Rotate 150 0 1 0
+        Translate 1.5 0 0
+        Scale 0.6 0.6 0.6
+        Color [0.9 0.9 0.8]
+        Surface "plastic"
+        Sphere 0.3 -0.3 0.3 360
+    TransformEnd
+    
+    # Third small satellite
+    TransformBegin
+        Rotate 270 0 1 0
+        Translate 1.5 0 0
+        Scale 0.6 0.6 0.6
+        Color [0.8 0.9 0.9]
+        Surface "matte"
+        Sphere 0.3 -0.3 0.3 360
+    TransformEnd
+    
+TransformEnd
+AttributeEnd
+
+# Lower ring of smaller spheres
+AttributeBegin
+TransformBegin
+    Translate 0 -1.2 -4
+    
+    # Tiny spheres in a ring
+    TransformBegin
+        Rotate 22.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [0.6 0.8 1.0]
+        Surface "metal"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 67.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [1.0 0.8 0.6]
+        Surface "plastic"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 112.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [0.8 1.0 0.6]
+        Surface "matte"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 157.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [0.8 0.6 1.0]
+        Surface "metal"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 202.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [1.0 0.6 0.8]
+        Surface "plastic"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 247.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [0.6 1.0 0.8]
+        Surface "matte"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 292.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [0.9 0.9 0.9]
+        Surface "metal"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+    TransformBegin
+        Rotate 337.5 0 1 0
+        Translate 1.8 0 0
+        Scale 0.4 0.4 0.4
+        Color [0.7 0.7 0.7]
+        Surface "plastic"
+        Sphere 0.25 -0.25 0.25 360
+    TransformEnd
+    
+TransformEnd
+AttributeEnd
+
+# Ground plane using a large displaced sphere
+AttributeBegin
+Color [0.3 0.3 0.4]
+Surface "matte"
+Translate 0 -50.5 0
+Sphere 50 -50 50 360
+AttributeEnd
+
+# Background elements - distant spheres for depth
+AttributeBegin
+Color [0.4 0.4 0.6]
+Surface "matte"
+Translate -8 2 -12
+Scale 2 2 2
+Sphere 1 -1 1 360
+AttributeEnd
+
+AttributeBegin
+Color [0.6 0.4 0.4]
+Surface "plastic"
+Translate 7 -1 -10
+Scale 1.5 1.5 1.5
+Sphere 1 -1 1 360
+AttributeEnd
+
+WorldEnd

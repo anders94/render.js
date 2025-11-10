@@ -1,0 +1,101 @@
+##RenderMan RIB-Structure 1.1
+version 3.03
+
+Format 800 600 1
+Projection "perspective" "fov" [40]
+
+WorldBegin
+
+# Multiple light sources for complex lighting
+LightSource "distantlight" 1 "from" [8 6 4] "to" [0 0 0] "intensity" [1.0]
+LightSource "distantlight" 2 "from" [-4 8 3] "to" [0 0 0] "intensity" [0.6]
+LightSource "distantlight" 3 "from" [2 -3 5] "to" [0 0 0] "intensity" [0.4]
+
+# First NURBS surface - a wave-like patch
+AttributeBegin
+Color [0.9 0.3 0.1]
+Surface "plastic"
+Translate -3 1 -5
+
+# 4x4 bicubic NURBS patch with wave-like control points
+NuPatch 4 4 "0 0 0 0 1 1 1 1" 0 1 4 4 "0 0 0 0 1 1 1 1" 0 1 "P" [
+    -2.0 -2.0  0.0   -0.7 -2.0  0.5    0.7 -2.0  0.5    2.0 -2.0  0.0
+    -2.0 -0.7  0.5   -0.7 -0.7  1.2    0.7 -0.7  1.2    2.0 -0.7  0.5
+    -2.0  0.7  0.5   -0.7  0.7  1.2    0.7  0.7  1.2    2.0  0.7  0.5
+    -2.0  2.0  0.0   -0.7  2.0  0.5    0.7  2.0  0.5    2.0  2.0  0.0
+]
+
+AttributeEnd
+
+# Second NURBS surface - a saddle shape
+AttributeBegin
+Color [0.2 0.7 0.9]
+Surface "metal"
+Translate 3 0 -4
+Rotate 30 0 1 0
+
+# 3x3 quadratic NURBS patch forming a saddle
+NuPatch 3 3 "0 0 0 1 1 1" 0 1 3 3 "0 0 0 1 1 1" 0 1 "P" [
+    -1.5 -1.5  1.0    0.0 -1.5  0.0    1.5 -1.5  1.0
+    -1.5  0.0  0.0    0.0  0.0  0.0    1.5  0.0  0.0
+    -1.5  1.5  1.0    0.0  1.5  0.0    1.5  1.5  1.0
+]
+
+AttributeEnd
+
+# Third NURBS surface - a dome-like shape
+AttributeBegin
+Color [0.6 0.9 0.2]
+Surface "plastic"
+Translate 0 3 -3
+Scale 0.8 0.8 0.8
+
+# 4x3 NURBS patch approximating a dome
+NuPatch 4 4 "0 0 0 0 1 1 1 1" 0 1 3 3 "0 0 0 1 1 1" 0 1 "P" [
+    -1.5 -1.0  0.0   -0.5 -1.0  0.8    0.5 -1.0  0.8    1.5 -1.0  0.0
+    -1.5  0.0  0.2   -0.5  0.0  1.5    0.5  0.0  1.5    1.5  0.0  0.2
+    -1.5  1.0  0.0   -0.5  1.0  0.8    0.5  1.0  0.8    1.5  1.0  0.0
+]
+
+AttributeEnd
+
+# Fourth NURBS surface - a twisted ribbon
+AttributeBegin
+Color [0.8 0.2 0.8]
+Surface "metal"
+Translate -1 -2 -3
+Rotate 45 0 0 1
+
+# 5x3 NURBS patch creating a twisted ribbon effect
+NuPatch 5 4 "0 0 0 0 0.5 1 1 1 1" 0 1 3 3 "0 0 0 1 1 1" 0 1 "P" [
+    -2.0 -0.5  0.0   -1.0 -0.5  0.2    0.0 -0.5  0.0    1.0 -0.5 -0.2    2.0 -0.5  0.0
+    -2.0  0.0  0.5   -1.0  0.0  1.0    0.0  0.0  0.8    1.0  0.0  0.5    2.0  0.0  0.2
+    -2.0  0.5  0.0   -1.0  0.5  0.2    0.0  0.5  0.0    1.0  0.5 -0.2    2.0  0.5  0.0
+]
+
+AttributeEnd
+
+# Reference spheres for scale and comparison
+AttributeBegin
+Color [0.7 0.7 0.7]
+Surface "matte"
+Translate -5 0 -2
+Sphere 0.3 -0.3 0.3 360
+AttributeEnd
+
+AttributeBegin
+Color [0.9 0.9 0.9]
+Surface "plastic"
+Translate 5 0 -2
+Sphere 0.3 -0.3 0.3 360
+AttributeEnd
+
+# Ground plane
+AttributeBegin
+Color [0.3 0.3 0.4]
+Surface "matte"
+Translate 0 -50.5 0
+Sphere 50 -50 50 360
+AttributeEnd
+
+WorldEnd

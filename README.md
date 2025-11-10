@@ -16,7 +16,7 @@ A Node.js raytracing renderer with RenderMan RIB format support, implemented in 
 - **Advanced Antialiasing**: Stratified sampling with quality presets
 - **Core Raytracing**: Full raytracing pipeline with reflection support
 - **Lighting Models**: Phong/Blinn-Phong shading with multiple light sources
-- **Geometry Primitives**: Spheres, planes, and triangles
+- **Geometry Primitives**: Spheres, planes, triangles, and NURBS surfaces
 - **Material System**: Support for different surface materials (plastic, metal, matte)
 - **Gamma Correction**: Proper color space handling
 - **PPM Image Output**: Generates standard PPM image files
@@ -40,6 +40,10 @@ npm test
 
 # Render a high-quality example
 npm run render:example
+
+# Try the NURBS examples
+node src/renderer.js --rib examples/nurbs_center.rib --aa medium
+node src/renderer.js --rib examples/nurbs_complex.rib --width 800 --height 600 --aa high
 ```
 
 ## Usage
@@ -51,7 +55,12 @@ node src/renderer.js
 
 ### Render from RIB File
 ```bash
+# Basic sphere scene
 node src/renderer.js --rib examples/simple.rib
+
+# NURBS surface examples  
+node src/renderer.js --rib examples/nurbs_center.rib
+node src/renderer.js --rib examples/nurbs_simple.rib
 ```
 
 ### Custom Resolution and Quality
@@ -106,12 +115,32 @@ The renderer supports a subset of RenderMan RIB commands:
 - `Surface "material"`
 - `Sphere radius zmin zmax thetamax`
 - `Polygon` (converted to triangles)
+- `NuPatch` (NURBS surfaces with full B-spline evaluation)
 - `LightSource "type"`
 
 ### Supported Surface Materials
 - `plastic`: Standard plastic material with moderate reflection
 - `metal`: Highly reflective metallic material
 - `matte`: Non-reflective diffuse material
+
+### NURBS Surface Support
+
+The renderer includes full support for Non-Uniform Rational B-Spline (NURBS) surfaces via the `NuPatch` command:
+
+- **Complete B-spline evaluation** using Cox-de Boor recursion algorithm
+- **Arbitrary degree surfaces** with custom knot vectors
+- **Tessellation-based ray intersection** for reliable rendering
+- **Multi-threaded NURBS rendering** with proper serialization
+- **Standard RenderMan syntax** compatibility
+
+Example NURBS syntax:
+```rib
+NuPatch 3 3 "0 0 0 1 1 1" 0 1 3 3 "0 0 0 1 1 1" 0 1 "P" [
+    -1.0 -1.0 -3.0    0.0 -1.0 -3.0    1.0 -1.0 -3.0
+    -1.0  0.0 -3.0    0.0  0.0 -3.0    1.0  0.0 -3.0
+    -1.0  1.0 -3.0    0.0  1.0 -3.0    1.0  1.0 -3.0
+]
+```
 
 ## Testing
 
